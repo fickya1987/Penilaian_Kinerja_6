@@ -13,6 +13,11 @@ df = load_data()
 
 st.title("Distribusi dan Perbandingan Skor KPI Pegawai")
 
+# Tombol untuk reset cache dan refresh
+if st.button("🔁 Clear Cache dan Refresh"):
+    st.cache_data.clear()
+    st.experimental_rerun()
+
 # Pilih NIPP siapa pun (bisa atasan atau bawahan)
 all_nipps = df['NIPP_Pekerja'].dropna().unique()
 selected_nipp = st.selectbox("Pilih NIPP Pegawai untuk Dilihat Posisi Skornya:", sorted(all_nipps))
@@ -48,7 +53,6 @@ def plot_distribution(df_source, selected_nipp, title):
     ax.set_ylim(90, 112)
     ax.set_title(title)
 
-    # Tambahkan kurva distribusi normal
     x = np.linspace(0, len(df_sorted), 500)
     y = norm.pdf(x, loc=len(df_sorted)/2, scale=len(df_sorted)/8)
     y_scaled = (y / y.max()) * (ax.get_ylim()[1] - ax.get_ylim()[0]) * 0.3 + ax.get_ylim()[0]
@@ -57,11 +61,13 @@ def plot_distribution(df_source, selected_nipp, title):
     ax.legend()
     st.pyplot(fig)
 
-    # Informasi ringkasan
+    # Info tambahan dinamis
     st.markdown(f"**Skor Pegawai (NIPP {selected_nipp})**: {selected_score:.2f}")
     st.markdown(f"**Peringkat dalam {title.lower()}**: {selected_rank} dari {len(df_sorted)}")
     st.markdown(f"**Rata-rata skor KPI**: {mean_score:.2f}")
     st.markdown(f"**Skewness distribusi ({title})**: {skew_value:.2f}")
+    st.write("Jumlah pegawai dalam distribusi ini:", len(df_sorted))
+    st.write("Skewness real-time:", skew_value)
 
 # Global distribution
 plot_distribution(df_valid, selected_nipp, "Distribusi Seluruh Pegawai")
