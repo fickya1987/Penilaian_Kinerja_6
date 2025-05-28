@@ -19,14 +19,15 @@ selected_nipp = st.selectbox("Pilih NIPP Pegawai untuk Dilihat Posisi Skornya:",
 
 # Ambil skor dan semua data yang valid
 df_valid = df[['NIPP_Pekerja', 'Skor_KPI_Final']].dropna()
-df_sorted = df_valid.sort_values(by='Skor_KPI_Final', ascending=True).reset_index(drop=True)
-df_sorted['Posisi'] = range(1, len(df_sorted) + 1)
 
-# Ambil skor NIPP terpilih
-def plot_distribution(df_sorted, selected_nipp, title):
+# Fungsi visualisasi distribusi
+def plot_distribution(df_source, selected_nipp, title):
+    df_sorted = df_source.sort_values(by='Skor_KPI_Final', ascending=True).reset_index(drop=True)
+    df_sorted['Posisi'] = range(1, len(df_sorted) + 1)
+
     selected_row = df_sorted[df_sorted['NIPP_Pekerja'] == selected_nipp]
     if selected_row.empty:
-        st.warning("NIPP tidak ditemukan dalam data skor KPI.")
+        st.warning(f"NIPP {selected_nipp} tidak ditemukan dalam {title.lower()}.")
         return
 
     selected_score = selected_row.iloc[0]['Skor_KPI_Final']
@@ -34,9 +35,9 @@ def plot_distribution(df_sorted, selected_nipp, title):
 
     mean_score = df_sorted['Skor_KPI_Final'].mean()
     std_score = df_sorted['Skor_KPI_Final'].std()
+    skew_value = skew(df_sorted['Skor_KPI_Final'])
 
     fig, ax = plt.subplots(figsize=(14, 6))
-
     bar_colors = ['skyblue' if nipp != selected_nipp else 'orange' for nipp in df_sorted['NIPP_Pekerja']]
     ax.bar(df_sorted['Posisi'], df_sorted['Skor_KPI_Final'], color=bar_colors, label='Skor KPI Pegawai')
 
@@ -47,6 +48,7 @@ def plot_distribution(df_sorted, selected_nipp, title):
     ax.set_ylim(90, 112)
     ax.set_title(title)
 
+    # Tambahkan kurva distribusi normal
     x = np.linspace(0, len(df_sorted), 500)
     y = norm.pdf(x, loc=len(df_sorted)/2, scale=len(df_sorted)/8)
     y_scaled = (y / y.max()) * (ax.get_ylim()[1] - ax.get_ylim()[0]) * 0.3 + ax.get_ylim()[0]
@@ -55,19 +57,19 @@ def plot_distribution(df_sorted, selected_nipp, title):
     ax.legend()
     st.pyplot(fig)
 
+    # Informasi ringkasan
     st.markdown(f"**Skor Pegawai (NIPP {selected_nipp})**: {selected_score:.2f}")
-    st.markdown(f"**Peringkat dari seluruh pegawai**: {selected_rank} dari {len(df_sorted)}")
-    st.markdown(f"**Rata-rata seluruh skor KPI**: {mean_score:.2f}")
-    st.markdown(f"**Skewness distribusi**: {skew(df_sorted['Skor_KPI_Final']):.2f}")
+    st.markdown(f"**Peringkat dalam {title.lower()}**: {selected_rank} dari {len(df_sorted)}")
+    st.markdown(f"**Rata-rata skor KPI**: {mean_score:.2f}")
+    st.markdown(f"**Skewness distribusi ({title})**: {skew_value:.2f}")
 
-# Plot global distribution
-plot_distribution(df_sorted, selected_nipp, "Distribusi Seluruh Pegawai")
+# Global distribution
+plot_distribution(df_valid, selected_nipp, "Distribusi Seluruh Pegawai")
 
-# Plot local distribution (bawahan dari atasan yang sama)
+# Distribusi pegawai di bawah atasan yang sama
 selected_atasan = df[df['NIPP_Pekerja'] == selected_nipp]['NIPP_Atasan'].values[0] if selected_nipp in df['NIPP_Pekerja'].values else None
 if selected_atasan:
     local_df = df[df['NIPP_Atasan'] == selected_atasan][['NIPP_Pekerja', 'Skor_KPI_Final']].dropna()
     if not local_df.empty:
-        local_sorted = local_df.sort_values(by='Skor_KPI_Final', ascending=True).reset_index(drop=True)
-        local_sorted['Posisi'] = range(1, len(local_sorted) + 1)
-        plot_distribution(local_sorted, selected_nipp, f"Distribusi Pegawai di Bawah Atasan NIPP {selected_atasan}")
+        plot_distribution(local_df, selected_nipp, f"Distribusi Pegawai di Bawah Atasan NIPP {selected_atasan}")
+
