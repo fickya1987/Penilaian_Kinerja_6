@@ -28,7 +28,7 @@ df_valid = df[['NIPP_Pekerja', 'Skor_KPI_Final']].dropna()
 # Fungsi visualisasi distribusi
 def plot_distribution(df_source, selected_nipp, title):
     df_sorted = df_source.sort_values(by='Skor_KPI_Final', ascending=True).reset_index(drop=True)
-    df_sorted['Posisi'] = range(1, len(df_sorted) + 1)
+    df_sorted['Posisi'] = range(len(df_sorted), 0, -1)  # Ranking: tertinggi = 1 di kanan
 
     selected_row = df_sorted[df_sorted['NIPP_Pekerja'] == selected_nipp]
     if selected_row.empty:
@@ -36,7 +36,7 @@ def plot_distribution(df_source, selected_nipp, title):
         return
 
     selected_score = selected_row.iloc[0]['Skor_KPI_Final']
-    selected_rank = selected_row.index[0] + 1
+    selected_rank = df_sorted.shape[0] - selected_row.index[0]
 
     mean_score = df_sorted['Skor_KPI_Final'].mean()
     std_score = df_sorted['Skor_KPI_Final'].std()
@@ -78,4 +78,3 @@ if selected_atasan:
     local_df = df[df['NIPP_Atasan'] == selected_atasan][['NIPP_Pekerja', 'Skor_KPI_Final']].dropna()
     if not local_df.empty:
         plot_distribution(local_df, selected_nipp, f"Distribusi Pegawai di Bawah Atasan NIPP {selected_atasan}")
-
