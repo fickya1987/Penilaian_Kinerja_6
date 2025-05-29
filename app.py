@@ -28,7 +28,7 @@ df_valid = df[['NIPP_Pekerja', 'Skor_KPI_Final']].dropna()
 # Fungsi visualisasi distribusi
 def plot_distribution(df_source, selected_nipp, title):
     df_sorted = df_source.sort_values(by='Skor_KPI_Final', ascending=True).reset_index(drop=True)
-    df_sorted['Posisi'] = range(len(df_sorted), 0, -1)  # Ranking: tertinggi = 1 di kanan
+    df_sorted['Posisi'] = range(1, len(df_sorted) + 1)  # Ranking: tertinggi = 1 di kanan
 
     selected_row = df_sorted[df_sorted['NIPP_Pekerja'] == selected_nipp]
     if selected_row.empty:
@@ -36,7 +36,7 @@ def plot_distribution(df_source, selected_nipp, title):
         return
 
     selected_score = selected_row.iloc[0]['Skor_KPI_Final']
-    selected_rank = df_sorted.shape[0] - selected_row.index[0]
+    selected_rank = len(df_sorted) - selected_row.index[0]
 
     mean_score = df_sorted['Skor_KPI_Final'].mean()
     std_score = df_sorted['Skor_KPI_Final'].std()
@@ -45,6 +45,7 @@ def plot_distribution(df_source, selected_nipp, title):
     fig, ax = plt.subplots(figsize=(14, 6))
     bar_colors = ['skyblue' if nipp != selected_nipp else 'orange' for nipp in df_sorted['NIPP_Pekerja']]
     ax.bar(df_sorted['Posisi'], df_sorted['Skor_KPI_Final'], color=bar_colors, label='Skor KPI Pegawai')
+    ax.invert_xaxis()  # Ranking terbaik di sisi kanan
 
     ax.axhline(mean_score, color='blue', linestyle='--', label=f'Rata-rata: {mean_score:.2f}')
     ax.axhline(selected_score, color='orange', linestyle='--', label=f'Skor NIPP {selected_nipp}: {selected_score:.2f}')
@@ -78,4 +79,3 @@ if selected_atasan:
     local_df = df[df['NIPP_Atasan'] == selected_atasan][['NIPP_Pekerja', 'Skor_KPI_Final']].dropna()
     if not local_df.empty:
         plot_distribution(local_df, selected_nipp, f"Distribusi Pegawai di Bawah Atasan NIPP {selected_atasan}")
-
