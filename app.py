@@ -45,7 +45,7 @@ def plot_distribution(df_source, selected_nipp, title):
     fig, ax = plt.subplots(figsize=(14, 6))
     bar_colors = ['skyblue' if nipp != selected_nipp else 'orange' for nipp in df_sorted['NIPP_Pekerja']]
     ax.bar(df_sorted['Posisi'], df_sorted['Skor_KPI_Final'], color=bar_colors, label='Skor KPI Pegawai')
-    ax.invert_xaxis()  # Ranking terbaik di sisi kanan
+    # ax.invert_xaxis()  # Dihapus agar kurva normal tidak terbalik  # Ranking terbaik di sisi kanan
 
     ax.axhline(mean_score, color='blue', linestyle='--', label=f'Rata-rata: {mean_score:.2f}')
     ax.axhline(selected_score, color='orange', linestyle='--', label=f'Skor NIPP {selected_nipp}: {selected_score:.2f}')
