@@ -78,3 +78,4 @@ if selected_atasan:
     local_df = df[df['NIPP_Atasan'] == selected_atasan][['NIPP_Pekerja', 'Skor_KPI_Final']].dropna()
     if not local_df.empty:
         plot_distribution(local_df, selected_nipp, f"Distribusi Pegawai di Bawah Atasan NIPP {selected_atasan}")
+
