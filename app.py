@@ -54,11 +54,6 @@ def plot_distribution(df_source, selected_nipp, title):
     ax.set_ylim(90, 112)
     ax.set_title(title)
 
-    x = np.linspace(0, len(df_sorted), 500)
-    y = norm.pdf(x, loc=len(df_sorted)/2, scale=len(df_sorted)/8)
-    y_scaled = (y / y.max()) * (ax.get_ylim()[1] - ax.get_ylim()[0]) * 0.3 + ax.get_ylim()[0]
-    ax.plot(x, y_scaled, color='red', label='Kurva Normal (Visualisasi)', linewidth=2)
-
     ax.legend()
     st.pyplot(fig)
 
